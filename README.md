@@ -215,20 +215,6 @@ park_video_dataset/
 | Data processing | Python, OpenCV, Pandas |
 | Visualization | Plotly / Matplotlib / Streamlit |
 
-## 11. Timeline
-
-| Week | Goal | Deliverable |
-|---|---|---|
-| Week 1 | Organize videos and define camera metadata | Clean video inventory |
-| Week 2 | Define ROI polygons and sample frames | ROI files plus sampled frames |
-| Week 3 | Label initial detection/tracking data | Box and track annotations |
-| Week 4 | Run detection and tracking baseline | Draft `tracks.csv` |
-| Week 5 | Compute hourly counts and dwell time | Draft `hourly_metrics.csv` |
-| Week 6 | Add tree/lake distance metrics | Nature exposure proxy metrics |
-| Week 7 | Label activity clips and child proxy labels | Activity and age annotations |
-| Week 8 | Add group and activity analysis | Draft `events.csv` |
-| Week 9 | Validate results against manual labels | Evaluation report |
-| Week 10 | Finalize dataset and dashboard | Final dataset release |
 
 ## 12. Key Notes
 

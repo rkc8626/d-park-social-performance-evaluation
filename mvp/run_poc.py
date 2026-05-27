@@ -366,7 +366,13 @@ def run_poc(cfg: dict[str, Any]) -> Path:
     max_frame = int(min(probe["frame_count"], max_seconds * fps))
 
     writer = None
-    preview_max_frame = int(preview_seconds * fps) if preview_seconds > 0 else 0
+    # preview_seconds: 0=off, >0=first N seconds, -1=full processed window
+    if preview_seconds < 0:
+        preview_max_frame = max_frame
+    elif preview_seconds > 0:
+        preview_max_frame = int(preview_seconds * fps)
+    else:
+        preview_max_frame = 0
 
     track_rows: list[dict[str, Any]] = []
     track_states: dict[int, TrackState] = {}
@@ -470,8 +476,8 @@ def run_poc(cfg: dict[str, Any]) -> Path:
                     }
                 )
 
-        # Annotated preview
-        if preview_seconds > 0 and frame_idx < preview_max_frame:
+        # Annotated preview (full window when preview_seconds == -1)
+        if preview_max_frame > 0 and frame_idx < preview_max_frame:
             ann = results.plot()
             if writer is None:
                 h, w = ann.shape[:2]

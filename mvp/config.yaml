@@ -26,7 +26,7 @@ speed_running_min: 45
 # Group proxy: centroid distance in pixels
 group_distance_px: 120
 
-# Optional annotated preview (seconds); set 0 to skip writing video
+# Annotated preview: 0=off, -1=full processed window, N=first N seconds
 preview_seconds: 0
 
 output_dir: ../outputs/mvp

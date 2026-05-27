@@ -1,0 +1,9 @@
+# Minimal deps for proof-of-concept (YOLO + ByteTrack via Ultralytics).
+# Use a venv: python -m venv .venv && source .venv/bin/activate && pip install -r requirements-mvp.txt
+ultralytics>=8.3.0
+opencv-python-headless>=4.8.0
+pandas>=2.0.0
+numpy>=1.24.0
+matplotlib>=3.7.0
+pyyaml>=6.0
+lap>=0.5.12

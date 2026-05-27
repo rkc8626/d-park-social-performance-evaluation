@@ -1,0 +1,32 @@
+# Proof-of-concept defaults — tune after first run.
+video_path: ../../west/GX020308.MP4
+video_id: GX020308
+camera_id: west
+
+# Seconds to process; 0 or null = full clip (~578s for GX020308).
+max_seconds: 0
+# Run detector every Nth frame (4K @30fps → ~7.5 effective fps at stride 4).
+frame_stride: 4
+# YOLO input size (downscales 4K automatically).
+imgsz: 1280
+model: yolov8n.pt
+tracker: bytetrack.yaml
+conf: 0.25
+
+# COCO class IDs used by off-the-shelf YOLO
+classes:
+  person: 0
+  bicycle: 1
+
+# Rule-based activity thresholds (pixels/sec at imgsz scale; calibrate per camera)
+speed_standing_max: 8
+speed_walking_min: 8
+speed_running_min: 45
+
+# Group proxy: centroid distance in pixels
+group_distance_px: 120
+
+# Optional annotated preview (seconds); set 0 to skip writing video
+preview_seconds: 0
+
+output_dir: ../outputs/mvp

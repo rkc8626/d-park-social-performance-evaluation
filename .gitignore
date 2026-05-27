@@ -1,0 +1,9 @@
+.venv/
+mvp/.cache/
+mvp/.job_pkgs/
+__pycache__/
+*.pyc
+outputs/
+*.pt
+mvp/yolov8n.pt
+.DS_Store

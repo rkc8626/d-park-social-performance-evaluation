@@ -12,7 +12,7 @@ MVP_DIR="${SLURM_SUBMIT_DIR:?submit from mvp/}"
 cd "$MVP_DIR"
 mkdir -p "${MVP_DIR}/../outputs/mvp"
 
-module load python/3.10 2>/dev/null || true
+module load python/3.10 ffmpeg/4.3.1 2>/dev/null || true
 if [[ -f ../.venv/bin/activate ]]; then
   source ../.venv/bin/activate
 fi

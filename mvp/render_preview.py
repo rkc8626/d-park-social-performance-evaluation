@@ -155,6 +155,7 @@ def render(
     roi_path: Path | None = None,
     output_fps: float = 2.0,
     scale: float = 0.5,
+    max_duration: float | None = None,
 ) -> None:
     tracks = pd.read_csv(tracks_path)
     if tracks.empty:
@@ -169,9 +170,10 @@ def render(
     h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     rois = load_roi_polygons(roi_path, target_size=(w, h))
 
-    timestamps = subsample_timestamps(
-        sorted(tracks["timestamp"].unique(), key=float), output_fps
-    )
+    ts_all = sorted(tracks["timestamp"].unique(), key=float)
+    if max_duration is not None:
+        ts_all = [t for t in ts_all if float(t) <= max_duration]
+    timestamps = subsample_timestamps([float(t) for t in ts_all], output_fps)
     n_source = len(tracks["timestamp"].unique())
 
     out_w = max(2, int(w * scale) // 2 * 2)
@@ -253,6 +255,12 @@ def main() -> None:
     p.add_argument("--roi", type=Path, default=None)
     p.add_argument("--output-fps", type=float, default=2.0)
     p.add_argument("--scale", type=float, default=0.5)
+    p.add_argument(
+        "--max-duration",
+        type=float,
+        default=None,
+        help="Only render timestamps <= this many seconds (for testing)",
+    )
     args = p.parse_args()
     out = args.output or args.tracks.parent / "preview_annotated.mp4"
     render(
@@ -262,6 +270,7 @@ def main() -> None:
         args.roi,
         output_fps=args.output_fps,
         scale=args.scale,
+        max_duration=args.max_duration,
     )
 
 

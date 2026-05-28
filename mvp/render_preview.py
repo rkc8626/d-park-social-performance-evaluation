@@ -11,21 +11,15 @@ import numpy as np
 import pandas as pd
 
 
-def load_roi_polygons(roi_path: Path | None) -> list[tuple[str, np.ndarray]]:
-    """Load optional ROI JSON: { \"lake\": [[x,y],...], \"tree_area\": [...] }."""
+def load_roi_polygons(
+    roi_path: Path | None, target_size: tuple[int, int] | None = None
+) -> list[tuple[str, np.ndarray]]:
     if roi_path is None or not roi_path.is_file():
         return []
-    import json
+    from roi_utils import load_roi_polygons as _load
 
-    data = json.loads(roi_path.read_text())
-    skip = {"camera_id", "video_id", "reference_frame", "resolution", "notes"}
-    out: list[tuple[str, np.ndarray]] = []
-    for name, pts in data.items():
-        if name.startswith("_") or name in skip or not isinstance(pts, list) or len(pts) < 3:
-            continue
-        arr = np.array(pts, dtype=np.int32).reshape(-1, 1, 2)
-        out.append((name, arr))
-    return out
+    polys, _ = _load(roi_path, target_size=target_size)
+    return polys
 
 
 def draw_rois(frame: np.ndarray, rois: list[tuple[str, np.ndarray]]) -> None:
@@ -53,7 +47,6 @@ def render(
     if tracks.empty:
         raise SystemExit(f"No rows in {tracks_path}")
 
-    rois = load_roi_polygons(roi_path)
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
         raise SystemExit(f"Cannot open {video_path}")
@@ -61,6 +54,7 @@ def render(
     fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
     w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    rois = load_roi_polygons(roi_path, target_size=(w, h))
 
     timestamps = sorted(tracks["timestamp"].unique())
     # Infer stride from median delta between sampled timestamps

@@ -1,12 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name=park-preview
-#SBATCH --partition=hpg-turin
+#SBATCH --partition=hpg-default
 #SBATCH --output=../outputs/mvp/slurm-preview-%j.out
 #SBATCH --error=../outputs/mvp/slurm-preview-%j.err
-#SBATCH --time=02:00:00
+#SBATCH --time=04:00:00
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
-#SBATCH --gres=gpu:0
 
 set -euo pipefail
 MVP_DIR="${SLURM_SUBMIT_DIR:?submit from mvp/}"

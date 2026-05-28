@@ -42,6 +42,7 @@ def apply(output_dir: Path, roi_path: Path, video_size: tuple[int, int] = (3840,
         )
 
     df["zone"] = zones
+    df["in_park"] = [z in ("park", "lake") or str(z).startswith("tree") for z in zones]
     df["near_lake"] = near_lake
     df["near_tree"] = near_tree
     df["dist_lake"] = [round(d, 1) if np.isfinite(d) else "" for d in d_lake]

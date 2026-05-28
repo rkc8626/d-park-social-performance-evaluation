@@ -88,8 +88,11 @@ def classify_centroid(
             zone = "lake"
         elif name.startswith("tree"):
             near_tree = True
-            if zone == "other":
+            if zone in ("other", "park"):
                 zone = name
+        elif name == "park":
+            if zone == "other":
+                zone = "park"
     return near_lake, near_tree, zone
 
 

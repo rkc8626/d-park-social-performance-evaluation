@@ -32,6 +32,9 @@ def rebuild_hourly(
     if persons.empty:
         return pd.DataFrame()
 
+    if "in_park" in persons.columns:
+        persons = persons[persons["in_park"] == True]  # noqa: E712
+
     dwell_by_tid = persons.groupby("track_id")["timestamp"].agg(["min", "max"])
     dwell_by_tid["dwell_s"] = dwell_by_tid["max"] - dwell_by_tid["min"]
 
@@ -43,7 +46,11 @@ def rebuild_hourly(
     rows: list[dict] = []
     for hour, hdf in tracks.groupby("hour", sort=True):
         hdf_p = hdf[hdf["class"] == "person"]
+        if "in_park" in hdf_p.columns:
+            hdf_p = hdf_p[hdf_p["in_park"] == True]  # noqa: E712
         hdf_b = hdf[hdf["class"].isin(["bicycle", "cyclist"])]
+        if "in_park" in hdf_b.columns:
+            hdf_b = hdf_b[hdf_b["in_park"] == True]  # noqa: E712
         pids = set(hdf_p["track_id"].astype(int))
         bids = set(hdf_b["track_id"].astype(int))
 

@@ -32,6 +32,8 @@ def load_roi_polygons(
 def draw_rois(frame: np.ndarray, rois: list[tuple[str, np.ndarray]]) -> None:
     palette = [(0, 200, 80), (0, 180, 120), (80, 220, 80), (0, 160, 60), (120, 255, 120)]
     for i, (name, poly) in enumerate(rois):
+        if name == "park":
+            continue  # full-frame park: skip overlay to reduce clutter
         if name == "lake":
             c = (255, 120, 0)
         elif name.startswith("tree"):

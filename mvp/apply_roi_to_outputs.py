@@ -44,6 +44,8 @@ def apply(output_dir: Path, roi_path: Path, video_size: tuple[int, int] = (3840,
     df["zone"] = zones
     df["near_lake"] = near_lake
     df["near_tree"] = near_tree
+    df["dist_lake"] = [round(d, 1) if np.isfinite(d) else "" for d in d_lake]
+    df["dist_tree"] = [round(d, 1) if np.isfinite(d) else "" for d in d_tree]
     df.to_csv(tracks_path, index=False)
 
     persons = df[df["class"] == "person"].copy()

@@ -33,7 +33,13 @@ Written to `../outputs/mvp/<video_id>/`:
 | `tracks.csv` | Per-frame detections + rule-based activity |
 | `hourly_metrics.csv` | Aggregates for the processed window |
 | `poc_summary.md` | Human-readable one-page summary |
-| `preview_annotated.mp4` | Short annotated clip for visual QA |
+| `preview_annotated.mp4` | QA video (default **2 fps**, **50% scale**; analysis stays at stride 4) |
+
+Re-render preview only (no YOLO rerun):
+
+```bash
+sbatch render_preview.slurm ../../east/GX020055.MP4 ../outputs/mvp/GX020055/tracks.csv ../annotations/roi/east.json
+```
 
 ## What is intentionally skipped
 

@@ -14,6 +14,15 @@ from apply_roi_to_outputs import apply as apply_roi
 from run_poc import build_events_df, classify_activity
 
 
+def _mean_dist(hdf: pd.DataFrame, col: str) -> float | str:
+    if col not in hdf.columns:
+        return ""
+    vals = pd.to_numeric(hdf[col], errors="coerce").dropna()
+    if vals.empty:
+        return ""
+    return round(float(vals.mean()), 1)
+
+
 def rebuild_hourly(
     tracks: pd.DataFrame,
     events: pd.DataFrame,
@@ -29,8 +38,10 @@ def rebuild_hourly(
     lake_visitors = set(persons.loc[persons["near_lake"], "track_id"].astype(int).unique())
     tree_visitors = set(persons.loc[persons["near_tree"], "track_id"].astype(int).unique())
 
+    tracks = tracks.copy()
+    tracks["hour"] = (tracks["timestamp"] // 3600).astype(int)
     rows: list[dict] = []
-    for hour, hdf in tracks.groupby((tracks["timestamp"] // 3600).astype(int), sort=True):
+    for hour, hdf in tracks.groupby("hour", sort=True):
         hdf_p = hdf[hdf["class"] == "person"]
         hdf_b = hdf[hdf["class"].isin(["bicycle", "cyclist"])]
         pids = set(hdf_p["track_id"].astype(int))
@@ -73,20 +84,8 @@ def rebuild_hourly(
                 "total_visitor_minutes": float(sum(dwell) / 60.0),
                 "pct_near_tree": round(100.0 * len(tree_p) / len(pids), 2) if pids else 0.0,
                 "pct_near_lake": round(100.0 * len(lake_p) / len(pids), 2) if pids else 0.0,
-                "avg_distance_to_tree": round(
-                    float(hdf_p.loc[hdf_p["near_tree"], "dist_tree"].mean()), 1
-                )
-                if "dist_tree" in hdf_p.columns and hdf_p["near_tree"].any()
-                else round(float(hdf_p["dist_tree"].mean()), 1)
-                if "dist_tree" in hdf_p.columns
-                else "",
-                "avg_distance_to_lake": round(
-                    float(hdf_p.loc[hdf_p["near_lake"], "dist_lake"].mean()), 1
-                )
-                if "dist_lake" in hdf_p.columns and hdf_p["near_lake"].any()
-                else round(float(hdf_p["dist_lake"].mean()), 1)
-                if "dist_lake" in hdf_p.columns
-                else "",
+                "avg_distance_to_tree": _mean_dist(hdf_p, "dist_tree"),
+                "avg_distance_to_lake": _mean_dist(hdf_p, "dist_lake"),
                 "activity_diversity": act_div,
                 "group_visitor_pct": round(100.0 * len(grouped) / len(pids), 2) if pids else 0.0,
                 "mean_group_size": round(float(sizes.mean()), 2) if len(sizes) else 0.0,

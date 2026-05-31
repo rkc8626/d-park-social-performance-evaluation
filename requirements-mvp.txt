@@ -1,5 +1,7 @@
 # Minimal deps for proof-of-concept (YOLO + ByteTrack via Ultralytics).
-# Use a venv: python -m venv .venv && source .venv/bin/activate && pip install -r requirements-mvp.txt
+# On HiPerGator (from this directory):
+#   source setup_env.sh
+#   install_mvp_deps    # first time only
 ultralytics>=8.3.0
 opencv-python-headless>=4.8.0
 pandas>=2.0.0

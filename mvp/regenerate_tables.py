@@ -11,7 +11,10 @@ import numpy as np
 import pandas as pd
 
 from apply_roi_to_outputs import apply as apply_roi
+from export_track_clips import ACTIVITIES, LABEL_STATUS_NOT_PERSON
 from run_poc import build_events_df, classify_activity
+
+_MANUAL_ACTIVITIES = set(ACTIVITIES) | {LABEL_STATUS_NOT_PERSON, "not_a_person"}
 
 
 def _mean_dist(hdf: pd.DataFrame, col: str) -> float | str:
@@ -31,6 +34,17 @@ def rebuild_hourly(
     persons = tracks[tracks["class"] == "person"].copy()
     if persons.empty:
         return pd.DataFrame()
+
+    if "activity_label" in persons.columns:
+        fp_ids = set(
+            persons.loc[
+                persons["activity_label"].astype(str) == "not_a_person", "track_id"
+            ]
+            .astype(int)
+            .unique()
+        )
+        if fp_ids:
+            persons = persons[~persons["track_id"].isin(fp_ids)]
 
     if "in_park" in persons.columns:
         persons = persons[persons["in_park"] == True]  # noqa: E712
@@ -81,6 +95,18 @@ def rebuild_hourly(
         lake_p = lake_visitors & pids
         tree_p = tree_visitors & pids
 
+        child_p: set[int] = set()
+        if "apparent_age_group" in persons.columns:
+            child_p = set(
+                persons.loc[
+                    persons["apparent_age_group"].astype(str).str.lower() == "child",
+                    "track_id",
+                ]
+                .astype(int)
+                .unique()
+            )
+        child_in_hour = child_p & pids
+
         rows.append(
             {
                 "hour": int(hour),
@@ -96,7 +122,9 @@ def rebuild_hourly(
                 "activity_diversity": act_div,
                 "group_visitor_pct": round(100.0 * len(grouped) / len(pids), 2) if pids else 0.0,
                 "mean_group_size": round(float(sizes.mean()), 2) if len(sizes) else 0.0,
-                "apparent_child_pct": "",
+                "apparent_child_pct": round(100.0 * len(child_in_hour) / len(pids), 2)
+                if pids and child_p
+                else (0.0 if pids and "apparent_age_group" in persons.columns else ""),
             }
         )
     return pd.DataFrame(rows)
@@ -111,10 +139,15 @@ def regenerate(
     apply_roi(output_dir, roi_path, video_size)
 
     tracks = pd.read_csv(output_dir / "tracks.csv")
-    tracks["activity_label"] = tracks.apply(
-        lambda r: classify_activity(str(r["class"]), float(r["speed"]), 8, 8, 45),
-        axis=1,
-    )
+
+    def _apply_rule(row: pd.Series) -> str:
+        act = str(row.get("activity_label", "")).strip()
+        age = str(row.get("apparent_age_group", "")).strip()
+        if age in ("child", "adult") or act in _MANUAL_ACTIVITIES:
+            return act
+        return classify_activity(str(row["class"]), float(row["speed"]), 8, 8, 45)
+
+    tracks["activity_label"] = tracks.apply(_apply_rule, axis=1)
     tracks.to_csv(output_dir / "tracks.csv", index=False)
 
     events = build_events_df(tracks, video_id)

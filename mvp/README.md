@@ -45,7 +45,8 @@ sbatch render_preview.slurm ../../east/GX020055.MP4 ../outputs/mvp/GX020055/trac
 
 - ROI polygons (lake, trees, park boundary)
 - Nature exposure and dwell time inside park zones
-- Child-age proxy classifier
+- Manual labeling export: `export_track_clips.py` → `annotations/labeling/` (see `annotations/labeling/README.md`)
+- Child-age proxy classifier (train after manual labels)
 - Manual validation / mAP
 
 ## Environment note (UF HPC)

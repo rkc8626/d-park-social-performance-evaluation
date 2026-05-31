@@ -1,0 +1,24 @@
+# Paths for clip export (relative to project root unless absolute).
+videos:
+  GX020308: ../west/GX020308.MP4
+  GX020055: ../east/GX020055.MP4
+
+# Default export batch under annotations/labeling/
+export_root: annotations/labeling/clips
+
+# Sampling
+default_n_clips: 150
+min_dwell_sec: 2.0
+min_track_frames: 8
+clip_pad_sec: 0.25
+frames_per_clip: 5
+crop_margin: 0.15
+
+# Rule-based speed hints at 4K (for stratification only)
+speed_walking_min: 8
+speed_running_min: 45
+
+# Drop likely junk before export (4K pixel coords; tune if too strict)
+min_confidence: 0.4
+min_bbox_height_px: 100
+min_bbox_area_px: 12000

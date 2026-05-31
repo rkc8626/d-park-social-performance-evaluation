@@ -1,0 +1,22 @@
+{
+  "batch_id": "GX020308_batch01",
+  "video_id": "GX020308",
+  "n_clips": 60,
+  "n_candidates": 60,
+  "activities": [
+    "walking",
+    "running",
+    "biking",
+    "sitting",
+    "standing",
+    "talking_socializing",
+    "playing",
+    "dog_walking",
+    "exercising",
+    "picnic_resting"
+  ],
+  "age_groups": [
+    "child",
+    "adult"
+  ]
+}

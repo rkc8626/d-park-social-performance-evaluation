@@ -1,0 +1,36 @@
+<View>
+  <Header value="Clip: $clip_id  |  video: $video_id  |  track_id: $track_id  |  t=$start_time–$end_time s"/>
+  <Header value="Look at all 5 frames, then label once below."/>
+  <View style="display:flex; flex-wrap:wrap; gap:8px;">
+    <Image name="f1" value="$f1" zoom="true" zoomBy="1.5" maxWidth="360px"/>
+    <Image name="f2" value="$f2" zoom="true" zoomBy="1.5" maxWidth="360px"/>
+    <Image name="f3" value="$f3" zoom="true" zoomBy="1.5" maxWidth="360px"/>
+    <Image name="f4" value="$f4" zoom="true" zoomBy="1.5" maxWidth="360px"/>
+    <Image name="f5" value="$f5" zoom="true" zoomBy="1.5" maxWidth="360px"/>
+  </View>
+  <Header value="1) Person check  2) If valid: activity + age"/>
+  <Choices name="label_status" toName="f1" choice="single" required="true">
+    <Choice value="valid" hint="Clear person — fill activity and age"/>
+    <Choice value="not_a_person" hint="False detection / not a person"/>
+    <Choice value="skip" hint="Cannot tell"/>
+  </Choices>
+  <Choices name="activity" toName="f1" choice="single" required="false" visibleWhen="choice-selected"
+           whenTagName="label_status" whenChoiceValue="valid">
+    <Choice value="walking"/>
+    <Choice value="running"/>
+    <Choice value="biking"/>
+    <Choice value="sitting"/>
+    <Choice value="standing"/>
+    <Choice value="talking_socializing"/>
+    <Choice value="playing"/>
+    <Choice value="dog_walking"/>
+    <Choice value="exercising"/>
+    <Choice value="picnic_resting"/>
+  </Choices>
+  <Choices name="age" toName="f1" choice="single" required="false" visibleWhen="choice-selected"
+           whenTagName="label_status" whenChoiceValue="valid">
+    <Choice value="child"/>
+    <Choice value="adult"/>
+  </Choices>
+  <TextArea name="notes" toName="f1" placeholder="optional notes" rows="2"/>
+</View>

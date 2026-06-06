@@ -1,0 +1,36 @@
+# Clip classifier training / inference
+dataset_index: annotations/labeling/dataset_index.csv
+models_dir: models
+activity_model: activity_resnet18.pt
+age_model: age_resnet18.pt
+labels_json: classifier_labels.json
+
+# Training
+image_size: 224
+epochs: 40
+batch_size: 16
+lr: 0.001
+val_ratio: 0.15
+seed: 42
+num_workers: 4
+
+# Inference (per person track)
+infer_samples_per_track: 5
+infer_confidence_min: 0.35
+overwrite_manual: false
+
+batches:
+  - annotations/labeling/clips/GX020055_batch01
+  - annotations/labeling/clips/GX020308_batch01
+
+videos:
+  GX020055: ../east/GX020055.MP4
+  GX020305: ../east/GX020305.MP4
+  GX020306: ../east/GX020306.MP4
+  GX020050: ../east/GX020050.MP4
+  GX020057: ../east/GX020057.MP4
+  GX020308: ../west/GX020308.MP4
+  GX020307: ../west/GX020307.MP4
+  GX020304: ../west/GX020304.MP4
+  GX020303: ../west/GX020303.MP4
+  GX020299: ../west/GX020299.MP4

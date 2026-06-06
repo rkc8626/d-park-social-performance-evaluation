@@ -1,0 +1,26 @@
+{
+  "activity": {
+    "classes": [
+      "walking",
+      "running",
+      "biking",
+      "sitting",
+      "standing",
+      "talking_socializing",
+      "playing",
+      "dog_walking",
+      "exercising",
+      "picnic_resting"
+    ],
+    "best_val_acc": 0.5483870967741935,
+    "path": "/orange/ufdatastudios/chenz1/depotData/d-park-social-performance-evaluation/mvp/models/activity_resnet18.pt"
+  },
+  "age": {
+    "classes": [
+      "child",
+      "adult"
+    ],
+    "best_val_acc": 1.0,
+    "path": "/orange/ufdatastudios/chenz1/depotData/d-park-social-performance-evaluation/mvp/models/age_resnet18.pt"
+  }
+}

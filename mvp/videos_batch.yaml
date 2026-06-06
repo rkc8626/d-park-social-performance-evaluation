@@ -1,0 +1,147 @@
+# Auto-generated — all depotData/east + west videos.
+# Regenerate: python generate_videos_batch.py
+# Same lake/tree ROI per camera (east.json / west.json).
+output_dir: ../outputs/mvp
+east:
+  camera_id: east
+  roi: ../annotations/roi/east.json
+  videos:
+  - id: GX010047
+    path: ../../east/GX010047.MP4
+  - id: GX010049
+    path: ../../east/GX010049.MP4
+  - id: GX010050
+    path: ../../east/GX010050.MP4
+  - id: GX010052
+    path: ../../east/GX010052.MP4
+  - id: GX010055
+    path: ../../east/GX010055.MP4
+  - id: GX010056
+    path: ../../east/GX010056.MP4
+  - id: GX010057
+    path: ../../east/GX010057.MP4
+  - id: GX010060
+    path: ../../east/GX010060.MP4
+  - id: GX010064
+    path: ../../east/GX010064.MP4
+  - id: GX010065
+    path: ../../east/GX010065.MP4
+  - id: GX010072
+    path: ../../east/GX010072.MP4
+  - id: GX010073
+    path: ../../east/GX010073.MP4
+  - id: GX010074
+    path: ../../east/GX010074.MP4
+  - id: GX010075
+    path: ../../east/GX010075.MP4
+  - id: GX010300
+    path: ../../east/GX010300.MP4
+  - id: GX010301
+    path: ../../east/GX010301.MP4
+  - id: GX010305
+    path: ../../east/GX010305.MP4
+  - id: GX010306
+    path: ../../east/GX010306.MP4
+  - id: GX020047
+    path: ../../east/GX020047.MP4
+  - id: GX020049
+    path: ../../east/GX020049.MP4
+  - id: GX020050
+    path: ../../east/GX020050.MP4
+  - id: GX020055
+    path: ../../east/GX020055.MP4
+  - id: GX020056
+    path: ../../east/GX020056.MP4
+  - id: GX020057
+    path: ../../east/GX020057.MP4
+  - id: GX020060
+    path: ../../east/GX020060.MP4
+  - id: GX020064
+    path: ../../east/GX020064.MP4
+  - id: GX020065
+    path: ../../east/GX020065.MP4
+  - id: GX020072
+    path: ../../east/GX020072.MP4
+  - id: GX020300
+    path: ../../east/GX020300.MP4
+  - id: GX020305
+    path: ../../east/GX020305.MP4
+  - id: GX020306
+    path: ../../east/GX020306.MP4
+west:
+  camera_id: west
+  roi: ../annotations/roi/west.json
+  videos:
+  - id: GX010061
+    path: ../../west/GX010061.MP4
+  - id: GX010063
+    path: ../../west/GX010063.MP4
+  - id: GX010069
+    path: ../../west/GX010069.MP4
+  - id: GX010070
+    path: ../../west/GX010070.MP4
+  - id: GX010071
+    path: ../../west/GX010071.MP4
+  - id: GX010289
+    path: ../../west/GX010289.MP4
+  - id: GX010290
+    path: ../../west/GX010290.MP4
+  - id: GX010291
+    path: ../../west/GX010291.MP4
+  - id: GX010293
+    path: ../../west/GX010293.MP4
+  - id: GX010294
+    path: ../../west/GX010294.MP4
+  - id: GX010295
+    path: ../../west/GX010295.MP4
+  - id: GX010296
+    path: ../../west/GX010296.MP4
+  - id: GX010299
+    path: ../../west/GX010299.MP4
+  - id: GX010303
+    path: ../../west/GX010303.MP4
+  - id: GX010304
+    path: ../../west/GX010304.MP4
+  - id: GX010307
+    path: ../../west/GX010307.MP4
+  - id: GX010308
+    path: ../../west/GX010308.MP4
+  - id: GX010309
+    path: ../../west/GX010309.MP4
+  - id: GX020061
+    path: ../../west/GX020061.MP4
+  - id: GX020063
+    path: ../../west/GX020063.MP4
+  - id: GX020069
+    path: ../../west/GX020069.MP4
+  - id: GX020070
+    path: ../../west/GX020070.MP4
+  - id: GX020289
+    path: ../../west/GX020289.MP4
+  - id: GX020290
+    path: ../../west/GX020290.MP4
+  - id: GX020291
+    path: ../../west/GX020291.MP4
+  - id: GX020293
+    path: ../../west/GX020293.MP4
+  - id: GX020294
+    path: ../../west/GX020294.MP4
+  - id: GX020295
+    path: ../../west/GX020295.MP4
+  - id: GX020296
+    path: ../../west/GX020296.MP4
+  - id: GX020299
+    path: ../../west/GX020299.MP4
+  - id: GX020303
+    path: ../../west/GX020303.MP4
+  - id: GX020304
+    path: ../../west/GX020304.MP4
+  - id: GX020307
+    path: ../../west/GX020307.MP4
+  - id: GX020308
+    path: ../../west/GX020308.MP4
+  - id: GX030307
+    path: ../../west/GX030307.MP4
+max_seconds: 0
+frame_stride: 4
+preview_seconds: 0

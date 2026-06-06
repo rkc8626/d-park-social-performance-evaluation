@@ -1,42 +1,68 @@
-# From manual labels to auto-labeling
+# Train & infer clip classifiers (HiPerGator)
 
-## Flow
+Uses **~188 valid** labeled clips (east + west batches) to train ResNet18 heads for **activity** (10 classes) and **age** (child/adult), then labels all person tracks.
 
-```
-export_track_clips.py  →  you fill manifest.csv  →  merge_manual_labels.py (optional audit)
-                              ↓
-                    train on crops/clips (your ML step)
-                              ↓
-                    label_tracks_infer.py (future)  →  full tracks.csv
-                              ↓
-                    regenerate_tables.py
+## One-shot (train + infer + tables)
+
+```bash
+cd depotData/d-park-social-performance-evaluation/mvp
+sbatch run_train_then_infer.slurm
 ```
 
-## Training data format
+Logs: `outputs/mvp/slurm-cls-all-<jobid>.out`
 
-Each `manifest.csv` row with non-empty labels + `clips/<clip_id>/frame_*.jpg` is one example:
+## Step by step
 
-- **Activity model:** input = 5 crops (or MP4), target = `activity_label`
-- **Age model:** same crops, target = `apparent_age_group`
+```bash
+cd mvp
 
-Suggested split: set `split` column to `train` / `val` / `test` in manifest before training.
+# 1) Train (GPU, ~30–60 min)
+sbatch train_classifier.slurm
 
-## Baseline models (not bundled in MVP)
+# 2) After train finishes — infer + regenerate tables (~1–3 h both videos)
+sbatch infer_classifier.slurm        # both videos
+# sbatch infer_classifier.slurm GX020055
+# sbatch infer_classifier.slurm GX020308
+```
 
-| Task | Simple baseline | Stronger |
-|------|-----------------|----------|
-| Activity | sklearn on motion stats + CNN embedding | MMAction2 / VideoMAE fine-tune |
-| Age | EfficientNet-B0 on person crops | Same, 2-class head |
+## What gets created
 
-Minimum useful set: **~200 labeled clips** (mix east/west, near/far, group/solo).
+| Path | Content |
+|------|---------|
+| `annotations/labeling/dataset_index.csv` | train/val split |
+| `mvp/models/activity_resnet18.pt` | activity classifier |
+| `mvp/models/age_resnet18.pt` | age classifier |
+| `mvp/models/classifier_labels.json` | class lists + val acc |
+| `outputs/mvp/*/tracks.csv` | auto labels on non-manual tracks |
+| `outputs/mvp/*/hourly_metrics.csv` | updated metrics |
 
-## After training
+## Behavior
 
-A future `label_tracks_infer.py` will:
+- **Training:** 5 JPEG crops per clip, average logits across frames.
+- **Inference:** sample 5 timestamps per person track from video; skip track IDs you already labeled manually (`valid` in manifest).
+- **Low confidence** (&lt; 0.35): leave existing rule-based label unchanged.
+- Tune `mvp/classifier_config.yaml` (`epochs`, `infer_confidence_min`, etc.).
 
-1. Load `tracks.csv` and video
-2. Run the trained models on every person track (sliding windows)
-3. Write `activity_label` and `apparent_age_group` on all frames
-4. You run `regenerate_tables.py` for `apparent_child_pct` and activity diversity
+## Check job
 
-Until that script exists, use `merge_manual_labels.py` for labeled rows only.
+```bash
+squeue -u $USER
+tail -f ../outputs/mvp/slurm-train-cls-*.out
+```
+
+## After infer
+
+Review val accuracy in `mvp/models/classifier_labels.json`. Spot-check `tracks.csv` and optional preview render.
+
+## Batch: 5 east + 5 west videos
+
+Training weights + same ROI per camera (`east.json` / `west.json`):
+
+```bash
+cd mvp
+# Edit video list: videos_batch.yaml
+sbatch run_batch.slurm              # all 10
+sbatch run_batch.slurm GX020308     # one video
+```
+
+Per video: YOLO+ByteTrack → ROI → classifier → `tracks.csv` / `hourly_metrics.csv` under `outputs/mvp/<video_id>/`.

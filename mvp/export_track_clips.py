@@ -60,19 +60,21 @@ def load_config(path: Path | None) -> dict:
 def resolve_video_path(video_id: str, tracks_path: Path, cfg: dict) -> Path:
     root = _project_root()
     rel = cfg.get("videos", {}).get(video_id)
-    if not rel:
-        raise SystemExit(f"No video path for {video_id} in labeling_config.yaml")
-    p = Path(rel)
-    if not p.is_absolute():
-        p = (root / p).resolve()
-    if not p.is_file():
-        depot = root.parent  # depotData/
-        for sub in ("west", "east"):
-            alt = depot / sub / f"{video_id}.MP4"
+    if rel:
+        p = Path(rel)
+        if not p.is_absolute():
+            p = (root / p).resolve()
+        if p.is_file():
+            return p
+    depot = root.parent  # depotData/
+    for sub in ("west", "east"):
+        for name in (f"{video_id}.MP4", f"{video_id}.mp4"):
+            alt = depot / sub / name
             if alt.is_file():
                 return alt
-        raise SystemExit(f"Video not found: {p}")
-    return p
+    if rel:
+        raise SystemExit(f"Video not found: {(root / rel).resolve()}")
+    raise SystemExit(f"No video path for {video_id} in labeling_config.yaml")
 
 
 def track_summaries(tracks: pd.DataFrame, cfg: dict) -> pd.DataFrame:

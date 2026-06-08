@@ -10,8 +10,20 @@ from pathlib import Path
 import torch
 import yaml
 
+import cv2
+
 from regenerate_tables import regenerate
+from render_preview import render as render_preview
+from roi_utils import resolve_roi_for_video
 from run_poc import load_config, run_poc
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+DEMO_SECONDS = 10.0
+DEMO_HEIGHT = 480
+DEMO_FPS = 2.0
+DEMO_NAME = "demo_10s_480p.mp4"
+PIPELINE_DONE = ".pipeline_complete"
 
 
 def _resolve(base: Path, rel: str) -> Path:
@@ -40,6 +52,53 @@ def load_batch(path: Path) -> dict:
         if key in cfg:
             out[key] = cfg[key]
     return out
+
+
+def render_demo(entry: dict, out_root: Path, skip_if_exists: bool = False) -> None:
+    demo_path = out_root / DEMO_NAME
+    tracks_path = out_root / "tracks.csv"
+    if not tracks_path.is_file():
+        print(f"=== Demo {entry['id']}: skip (no tracks.csv) ===")
+        return
+    if skip_if_exists and demo_path.is_file():
+        print(f"=== Demo {entry['id']}: skip (exists) ===")
+        return
+
+    cap = cv2.VideoCapture(str(entry["path"]))
+    if not cap.isOpened():
+        print(f"=== Demo {entry['id']}: skip (cannot open video) ===")
+        return
+    h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) or 2160
+    cap.release()
+    scale = DEMO_HEIGHT / h
+
+    roi_path = resolve_roi_for_video(PROJECT_ROOT, entry["id"], entry["camera_id"])
+    print(f"=== Demo {entry['id']} ({DEMO_SECONDS}s @ {DEMO_HEIGHT}p) ===")
+    try:
+        render_preview(
+            Path(entry["path"]),
+            tracks_path,
+            demo_path,
+            roi_path,
+            output_fps=DEMO_FPS,
+            scale=scale,
+            max_duration=DEMO_SECONDS,
+        )
+    except SystemExit as exc:
+        print(f"=== Demo {entry['id']}: WARN ({exc}) — retry from t=0 without track filter ===")
+        try:
+            render_preview(
+                Path(entry["path"]),
+                tracks_path,
+                demo_path,
+                roi_path,
+                output_fps=DEMO_FPS,
+                scale=scale,
+                max_duration=DEMO_SECONDS,
+                time_window=(0.0, DEMO_SECONDS),
+            )
+        except SystemExit as exc2:
+            print(f"=== Demo {entry['id']}: FAILED ({exc2}) — continuing batch ===")
 
 
 def iter_videos(batch: dict, video_id: str | None = None):
@@ -80,14 +139,25 @@ def process_video(
     else:
         print(f"\n=== POC {vid}: skipped (tracks exist) ===")
 
-    print(f"=== ROI zones {vid} ===")
-    regenerate(out_root, Path(entry["roi"]), vid)
+    roi_path = resolve_roi_for_video(PROJECT_ROOT, vid, entry["camera_id"])
+    print(f"=== ROI zones {vid} ({roi_path.name}) ===")
+    regenerate(out_root, roi_path, vid)
 
     print(f"=== Infer {vid} ===")
-    infer_video(tracks_path, out_root, cls_cfg, device, bool(cls_cfg.get("overwrite_manual", False)))
+    infer_video(
+        tracks_path,
+        out_root,
+        cls_cfg,
+        device,
+        bool(cls_cfg.get("overwrite_manual", False)),
+        video_path=Path(entry["path"]),
+    )
 
     print(f"=== Tables {vid} ===")
-    regenerate(out_root, Path(entry["roi"]), vid)
+    regenerate(out_root, roi_path, vid)
+
+    render_demo(entry, out_root)
+    (out_root / PIPELINE_DONE).write_text("ok\n")
 
 
 def main() -> None:
@@ -102,6 +172,11 @@ def main() -> None:
         "--skip-existing",
         action="store_true",
         help="Skip videos that already have hourly_metrics.csv + tracks.csv",
+    )
+    p.add_argument(
+        "--continue-on-error",
+        action="store_true",
+        help="Log failures and continue with remaining videos (batch runs)",
     )
     args = p.parse_args()
 
@@ -119,10 +194,20 @@ def main() -> None:
         if not Path(entry["path"]).is_file():
             raise SystemExit(f"Video not found: {entry['path']}")
         out_root = Path(batch["output_dir"]) / entry["id"]
-        if args.skip_existing and (out_root / "hourly_metrics.csv").is_file() and (out_root / "tracks.csv").is_file():
-            print(f"\n=== Skip {entry['id']} (outputs exist) ===")
+        if args.skip_existing and (out_root / PIPELINE_DONE).is_file():
+            print(f"\n=== Skip {entry['id']} (pipeline complete) ===")
+            render_demo(entry, out_root, skip_if_exists=True)
             continue
-        process_video(entry, poc_base, batch, cls_cfg, device, args.skip_poc)
+        if args.skip_existing and (out_root / "tracks.csv").is_file():
+            print(f"\n=== Resume {entry['id']} (tracks exist, skip POC) ===")
+            process_video(entry, poc_base, batch, cls_cfg, device, skip_poc=True)
+            continue
+        try:
+            process_video(entry, poc_base, batch, cls_cfg, device, args.skip_poc)
+        except Exception as exc:
+            if not args.continue_on_error:
+                raise
+            print(f"\n=== ERROR {entry['id']}: {exc} ===", flush=True)
 
     print("\nAll done.")
 

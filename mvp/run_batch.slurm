@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=park-batch-all
+#SBATCH --job-name=park-batch
 #SBATCH --account=ufdatastudios
 #SBATCH --partition=hpg-b200
 #SBATCH --output=../outputs/mvp/slurm-batch-%j.out
@@ -12,7 +12,7 @@
 #SBATCH --mail-user=chenz1@ufl.edu
 
 # All depotData/east + west videos (regenerate list first).
-# Submit: cd mvp && python generate_videos_batch.py && sbatch run_batch.slurm
+# Submit: cd mvp && sbatch run_batch.slurm
 # One video: sbatch run_batch.slurm GX020308
 # Force redo one: python run_video_pipeline.py --video-id GX020308 --device cuda
 
@@ -30,7 +30,7 @@ if [[ ! -f "${MVP_DIR}/models/activity_resnet18.pt" ]]; then
   exit 1
 fi
 
-python generate_videos_batch.py
+python generate_videos_batch.py --sync-classifier
 
 python -c "
 import torch, torchvision
@@ -42,7 +42,7 @@ VID="${1:-}"
 if [[ -n "$VID" ]]; then
   python run_video_pipeline.py --video-id "$VID" --device cuda
 else
-  python run_video_pipeline.py --device cuda --skip-existing
+  python run_video_pipeline.py --device cuda --skip-existing --continue-on-error
 fi
 
 echo "Batch complete."

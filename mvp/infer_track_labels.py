@@ -19,19 +19,42 @@ from export_track_clips import ACTIVITIES, AGE_GROUPS, LABEL_STATUS_NOT_PERSON
 from train_clip_classifier import _make_model
 
 
-def _resolve_video(root: Path, video_id: str, cfg: dict) -> Path:
+def _resolve_video(
+    root: Path,
+    video_id: str,
+    cfg: dict,
+    video_path: Path | None = None,
+) -> Path:
+    """Resolve source MP4 for a video_id (batch pipeline may pass an already-validated path)."""
+    if video_path is not None:
+        p = Path(video_path).resolve()
+        if p.is_file():
+            return p
+        raise SystemExit(f"Video not found: {p}")
+
     rel = cfg.get("videos", {}).get(video_id)
-    if not rel:
-        raise SystemExit(f"No video path for {video_id}")
-    p = (root / rel).resolve()
-    if p.is_file():
-        return p
-    depot = root.parent
-    for sub in ("west", "east"):
-        alt = depot / sub / f"{video_id}.MP4"
-        if alt.is_file():
-            return alt
-    raise SystemExit(f"Video not found: {p}")
+    if rel:
+        p = (root / rel).resolve()
+        if p.is_file():
+            return p
+
+    depot = root.parent  # depotData/
+    for sub in ("east", "west"):
+        for name in (f"{video_id}.MP4", f"{video_id}.mp4"):
+            alt = depot / sub / name
+            if alt.is_file():
+                return alt
+        for ext in ("MP4", "mp4"):
+            alt = (root / "mvp" / f"../../{sub}/{video_id}.{ext}").resolve()
+            if alt.is_file():
+                return alt
+
+    if rel:
+        raise SystemExit(f"Video not found: {(root / rel).resolve()}")
+    raise SystemExit(
+        f"No video path for {video_id} — add to classifier_config.yaml videos "
+        f"or run: python generate_videos_batch.py --sync-classifier"
+    )
 
 
 def _crop(frame: np.ndarray, bbox: tuple[float, float, float, float], margin: float = 0.15) -> np.ndarray:
@@ -112,6 +135,7 @@ def infer_video(
     cfg: dict,
     device: torch.device,
     overwrite_manual: bool,
+    video_path: Path | None = None,
 ) -> None:
     root = Path(__file__).resolve().parents[1]
     models_dir = (Path(__file__).parent / cfg.get("models_dir", "models")).resolve()
@@ -125,7 +149,7 @@ def infer_video(
 
     tracks = pd.read_csv(tracks_path)
     video_id = str(tracks["video_id"].iloc[0])
-    video_path = _resolve_video(root, video_id, cfg)
+    resolved = _resolve_video(root, video_id, cfg, video_path=video_path)
     persons = tracks[tracks["class"] == "person"].copy()
     manual_keys = _manual_track_keys(root, cfg) if not overwrite_manual else set()
 
@@ -133,9 +157,9 @@ def infer_video(
     conf_min = float(cfg.get("infer_confidence_min", 0.35))
     margin = 0.15
 
-    cap = cv2.VideoCapture(str(video_path))
+    cap = cv2.VideoCapture(str(resolved))
     if not cap.isOpened():
-        raise SystemExit(f"Cannot open {video_path}")
+        raise SystemExit(f"Cannot open {resolved}")
 
     track_ids = sorted(persons["track_id"].unique())
     n_done = 0

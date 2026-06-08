@@ -22,9 +22,30 @@ def _videos(side: str) -> list[dict]:
     return items
 
 
+def _classifier_video_paths() -> dict[str, str]:
+    """Paths relative to project root (same convention as classifier_config.yaml)."""
+    out: dict[str, str] = {}
+    for side in ("east", "west"):
+        for item in _videos(side):
+            out[item["id"]] = f"../{side}/{item['id']}.MP4"
+    return out
+
+
+def _sync_classifier_config(classifier_path: Path) -> None:
+    cfg = yaml.safe_load(classifier_path.read_text())
+    cfg["videos"] = _classifier_video_paths()
+    classifier_path.write_text(yaml.dump(cfg, sort_keys=False, allow_unicode=True))
+    print(f"Synced {len(cfg['videos'])} videos into {classifier_path}")
+
+
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--out", type=Path, default=Path(__file__).with_name("videos_batch.yaml"))
+    p.add_argument(
+        "--sync-classifier",
+        action="store_true",
+        help="Also update classifier_config.yaml videos map (all east+west MP4s)",
+    )
     args = p.parse_args()
 
     cfg = {
@@ -51,6 +72,9 @@ def main() -> None:
     args.out.write_text(header + yaml.dump(cfg, sort_keys=False, allow_unicode=True))
     ne, nw = len(cfg["east"]["videos"]), len(cfg["west"]["videos"])
     print(f"Wrote {args.out} — east={ne}, west={nw}, total={ne + nw}")
+
+    if args.sync_classifier:
+        _sync_classifier_config(Path(__file__).with_name("classifier_config.yaml"))
 
 
 if __name__ == "__main__":

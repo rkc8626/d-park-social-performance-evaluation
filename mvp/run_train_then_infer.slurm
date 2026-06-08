@@ -18,4 +18,4 @@ JOB_INFER="${MVP_DIR}/infer_classifier.slurm"
 
 cd "$MVP_DIR"
 bash "$JOB_TRAIN"
-bash "$JOB_INFER" both
+bash "$JOB_INFER" --skip-existing

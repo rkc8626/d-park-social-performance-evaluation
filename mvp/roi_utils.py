@@ -101,3 +101,56 @@ def min_distance_to_poly(cx: float, cy: float, poly: np.ndarray) -> float:
 
     d = cv2.pointPolygonTest(poly, (float(cx), float(cy)), True)
     return 0.0 if d >= 0 else abs(float(d))
+
+
+def resolve_roi_for_video(project_root: Path, video_id: str, camera_id: str) -> Path:
+    """Per-video ROI if saved; otherwise camera default (east.json / west.json)."""
+    per = project_root / "annotations" / "roi" / "per_video" / f"{video_id}.json"
+    if per.is_file():
+        return per
+    return project_root / "annotations" / "roi" / f"{camera_id}.json"
+
+
+def editable_layer_names(data: dict) -> list[str]:
+  names = []
+  for name in data:
+      if name.startswith("_") or name in _META:
+          continue
+      if name == "park":
+          continue
+      pts = _extract_points(data[name])
+      if pts and len(pts) >= 3:
+          names.append(name)
+  return sorted(names, key=lambda n: (0 if n == "lake" else 1, n))
+
+
+def polys_to_frame_points(
+    roi_path: Path, frame_size: tuple[int, int]
+) -> dict[str, list[list[int]]]:
+    polys, _ = load_roi_polygons(roi_path, target_size=frame_size)
+    out: dict[str, list[list[int]]] = {}
+    for name, poly in polys:
+        out[name] = [[int(p[0][0]), int(p[0][1])] for p in poly]
+    return out
+
+
+def write_roi_json(
+    path: Path,
+    *,
+    camera_id: str,
+    video_id: str,
+    frame_size: tuple[int, int],
+    polygons: dict[str, list[list[int]]],
+    notes: str = "",
+) -> None:
+    w, h = frame_size
+    payload: dict[str, object] = {
+        "camera_id": camera_id,
+        "video_id": video_id,
+        "resolution": f"{w}x{h}",
+        "notes": notes or f"Adjusted for {video_id} frame alignment",
+    }
+    for name, pts in polygons.items():
+        payload[name] = [{"label": name, "points": pts}]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2) + "\n")

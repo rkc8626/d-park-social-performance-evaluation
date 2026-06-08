@@ -158,6 +158,7 @@ def render(
     output_fps: float = 2.0,
     scale: float = 0.5,
     max_duration: float | None = None,
+    time_window: tuple[float, float] | None = None,
 ) -> None:
     tracks = pd.read_csv(tracks_path)
     if tracks.empty:
@@ -175,6 +176,9 @@ def render(
     ts_all = sorted(tracks["timestamp"].unique(), key=float)
     if max_duration is not None:
         ts_all = [t for t in ts_all if float(t) <= max_duration]
+    if not ts_all and time_window is not None:
+        t0, t1 = time_window
+        ts_all = list(np.arange(t0, t1 + 1e-6, 1.0 / output_fps))
     timestamps = subsample_timestamps([float(t) for t in ts_all], output_fps)
     n_source = len(tracks["timestamp"].unique())
 

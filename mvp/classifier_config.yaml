@@ -1,11 +1,8 @@
-# Clip classifier training / inference
 dataset_index: annotations/labeling/dataset_index.csv
 models_dir: models
 activity_model: activity_resnet18.pt
 age_model: age_resnet18.pt
 labels_json: classifier_labels.json
-
-# Training
 image_size: 224
 epochs: 40
 batch_size: 16
@@ -13,24 +10,76 @@ lr: 0.001
 val_ratio: 0.15
 seed: 42
 num_workers: 4
-
-# Inference (per person track)
 infer_samples_per_track: 5
 infer_confidence_min: 0.35
 overwrite_manual: false
-
 batches:
-  - annotations/labeling/clips/GX020055_batch01
-  - annotations/labeling/clips/GX020308_batch01
-
+- annotations/labeling/clips/GX020055_batch01
+- annotations/labeling/clips/GX020308_batch01
 videos:
+  GX010047: ../east/GX010047.MP4
+  GX010049: ../east/GX010049.MP4
+  GX010050: ../east/GX010050.MP4
+  GX010052: ../east/GX010052.MP4
+  GX010055: ../east/GX010055.MP4
+  GX010056: ../east/GX010056.MP4
+  GX010057: ../east/GX010057.MP4
+  GX010060: ../east/GX010060.MP4
+  GX010064: ../east/GX010064.MP4
+  GX010065: ../east/GX010065.MP4
+  GX010072: ../east/GX010072.MP4
+  GX010073: ../east/GX010073.MP4
+  GX010074: ../east/GX010074.MP4
+  GX010075: ../east/GX010075.MP4
+  GX010300: ../east/GX010300.MP4
+  GX010301: ../east/GX010301.MP4
+  GX010305: ../east/GX010305.MP4
+  GX010306: ../east/GX010306.MP4
+  GX020047: ../east/GX020047.MP4
+  GX020049: ../east/GX020049.MP4
+  GX020050: ../east/GX020050.MP4
   GX020055: ../east/GX020055.MP4
+  GX020056: ../east/GX020056.MP4
+  GX020057: ../east/GX020057.MP4
+  GX020060: ../east/GX020060.MP4
+  GX020064: ../east/GX020064.MP4
+  GX020065: ../east/GX020065.MP4
+  GX020072: ../east/GX020072.MP4
+  GX020300: ../east/GX020300.MP4
   GX020305: ../east/GX020305.MP4
   GX020306: ../east/GX020306.MP4
-  GX020050: ../east/GX020050.MP4
-  GX020057: ../east/GX020057.MP4
-  GX020308: ../west/GX020308.MP4
-  GX020307: ../west/GX020307.MP4
-  GX020304: ../west/GX020304.MP4
-  GX020303: ../west/GX020303.MP4
+  GX010061: ../west/GX010061.MP4
+  GX010063: ../west/GX010063.MP4
+  GX010069: ../west/GX010069.MP4
+  GX010070: ../west/GX010070.MP4
+  GX010071: ../west/GX010071.MP4
+  GX010289: ../west/GX010289.MP4
+  GX010290: ../west/GX010290.MP4
+  GX010291: ../west/GX010291.MP4
+  GX010293: ../west/GX010293.MP4
+  GX010294: ../west/GX010294.MP4
+  GX010295: ../west/GX010295.MP4
+  GX010296: ../west/GX010296.MP4
+  GX010299: ../west/GX010299.MP4
+  GX010303: ../west/GX010303.MP4
+  GX010304: ../west/GX010304.MP4
+  GX010307: ../west/GX010307.MP4
+  GX010308: ../west/GX010308.MP4
+  GX010309: ../west/GX010309.MP4
+  GX020061: ../west/GX020061.MP4
+  GX020063: ../west/GX020063.MP4
+  GX020069: ../west/GX020069.MP4
+  GX020070: ../west/GX020070.MP4
+  GX020289: ../west/GX020289.MP4
+  GX020290: ../west/GX020290.MP4
+  GX020291: ../west/GX020291.MP4
+  GX020293: ../west/GX020293.MP4
+  GX020294: ../west/GX020294.MP4
+  GX020295: ../west/GX020295.MP4
+  GX020296: ../west/GX020296.MP4
   GX020299: ../west/GX020299.MP4
+  GX020303: ../west/GX020303.MP4
+  GX020304: ../west/GX020304.MP4
+  GX020307: ../west/GX020307.MP4
+  GX020308: ../west/GX020308.MP4
+  GX030307: ../west/GX030307.MP4
